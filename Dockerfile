@@ -1,9 +1,11 @@
-FROM golang:1.26 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.27 AS builder
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -o /envoy-ext-test-server .
+RUN CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" go build -o /envoy-ext-test-server .
 
 FROM scratch
 COPY --from=builder /envoy-ext-test-server /envoy-ext-test-server
